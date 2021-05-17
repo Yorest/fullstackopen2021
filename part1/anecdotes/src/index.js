@@ -1,60 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 
-const App = ({ anecdotes }) => {
+const Anecdote = ({ text, votes = 0 }) => {
+    return (
+        <div>
+            <div>{text}</div>
+            <div>has {votes} votes</div>
+        </div>
+    );
+};
+
+const App = (props) => {
     const [selected, setSelected] = useState(0);
-    const [points, setPoints] = useState({
-        0: 0,
-        1: 0,
-        2: 0,
-        3: 0,
-        4: 0,
-        5: 0,
-    });
+    const [votes, setVotes] = useState({});
+    const [mostVotes, setMostVotes] = useState(0);
 
-    const [maxvote, setMaxvote] = useState(0);
-
-    useEffect(() => {
-        let maxValue = 0;
-        let keyvote = 0;
-
-        for (const key in points) {
-            if (points[key] > maxValue) {
-                maxValue = points[key];
-                keyvote = key;
-            }
+    const next = () => {
+        let random = Math.floor(Math.random() * anecdotes.length);
+        while (random === selected) {
+            random = Math.floor(Math.random() * anecdotes.length);
         }
 
-        setMaxvote(keyvote);
-    }, [points]);
-
-    const random = (min, max) => {
-        return Math.floor(Math.random() * (max - min + 1) + min);
+        setSelected(random);
     };
 
-    const handleRandom = () => {
-        setSelected(random(0, anecdotes.length - 1));
-    };
-
-    const handleVote = (num) => {
-        setPoints({ ...points, [num]: points[num] + 1 });
+    const vote = () => {
+        const selectedVoteCount = votes[selected] || 0;
+        setVotes({
+            ...votes,
+            [selected]: selectedVoteCount + 1,
+        });
+        if (!votes[mostVotes] || selectedVoteCount + 1 > votes[mostVotes]) {
+            setMostVotes(selected);
+        }
     };
 
     return (
-        <>
-            {' '}
-            <h1>Anecdote of the day</h1>
-            <div>{anecdotes[selected]}</div>
-            <div>{points[selected]}</div>
-            <button onClick={() => handleVote(selected)}>Vote</button>
-            <button onClick={handleRandom}>next anecdote</button>
-            <br /> <br />
-            <h3>Anecdote with most votes</h3>
-            <div>
-                {anecdotes[maxvote]}.
-                <strong>has {points[maxvote]} votes</strong>
-            </div>
-        </>
+        <div>
+            <h2>Anecdote of the day</h2>
+            <Anecdote
+                text={props.anecdotes[selected]}
+                votes={votes[selected]}
+            />
+            <button onClick={vote}>vote</button>
+            <button onClick={next}>next anecdote</button>
+            <h2>Anecdote with most votes</h2>
+            <Anecdote
+                text={props.anecdotes[mostVotes]}
+                votes={votes[mostVotes]}
+            />
+        </div>
     );
 };
 
